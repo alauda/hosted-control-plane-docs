@@ -4,4 +4,35 @@ weight: 30
 
 # Concepts
 
+This section explains the core concepts and architectural principles of Alauda Hosted Control Plane. Understanding these concepts is essential for effectively deploying and managing hosted control plane clusters.
+
+## What You'll Learn
+
+- **Core Concepts**: Fundamental building blocks including Management Cluster, Hosted Control Plane, Data Plane, DataStore, and key Kubernetes resources
+- **Architecture Deep Dive**: In-depth exploration of the architecture, design principles, communication flows, and configuration best practices
+
+## Overview
+
+Alauda Hosted Control Plane introduces a new paradigm for Kubernetes cluster management by decoupling control plane components from data plane nodes. Instead of dedicating physical nodes to host control plane components, they run as standard Kubernetes workloads on a shared management cluster.
+
+This architectural approach provides significant benefits:
+
+- **Resource Efficiency**: Multiple control planes share infrastructure, reducing hardware requirements by 60-80%
+- **Operational Simplicity**: Centralized management of all control planes using standard Kubernetes tools
+- **Rapid Provisioning**: Deploy new clusters in minutes without allocating dedicated infrastructure
+- **Enhanced Isolation**: Control plane and data plane operate independently with better failure domain separation
+- **Greater Flexibility**: Support for edge computing, hybrid cloud, and multi-tenant scenarios
+
+## Key Concepts at a Glance
+
+| Concept | Description |
+|---------|-------------|
+| **Management Cluster** | A Kubernetes cluster running on Alauda Container Platform that hosts multiple control plane instances |
+| **Hosted Control Plane** | Kubernetes control plane components (API server, controller manager, scheduler) running as workloads |
+| **Data Plane** | Worker nodes in separate infrastructure that run application workloads |
+| **DataStore** | Configuration for external etcd cluster used as storage backend for control plane data |
+| **TenantControlPlane** | Kamaji resource representing a complete control plane instance for one cluster |
+| **Konnectivity** | Network proxy maintaining secure connections between control plane and worker nodes |
+| **Cluster API** | Kubernetes standard for declarative cluster lifecycle management |
+
 <Overview />
