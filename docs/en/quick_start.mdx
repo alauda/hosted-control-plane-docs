@@ -17,7 +17,7 @@ Choose an Alauda Container Platform workload cluster as the management cluster. 
 If you choose a workload cluster as the management cluster, run the following command in the global CLI console:
 
 ```shell
-kubectl label clusters -n {NAMESPACE} {MANAGEMENT_CLUSTER_NAME} cpaas.io/capi-cluster-manager=true
+kubectl label clusters -n cpaas-system {MANAGEMENT_CLUSTER_NAME} cpaas.io/capi-cluster-manager=true
 ```
 
 ### Environment Requirements
@@ -283,7 +283,7 @@ spec:
 - `{COREDNS_IMAGE_TAG}`: CoreDNS image tag (obtained from the command above)
 - `{KUBE_PROXY_IMAGE_TAG}`: kube-proxy image tag (typically matches Kubernetes version)
 - `{CONTROL_PLANE_REPLICAS}`: Number of control plane replicas (recommended: `3` for high availability)
-- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.6`, check global cluster for supported versions)
+- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.7`, check global cluster for supported versions)
 
 ### 2.5 Verify Control Plane Status
 
@@ -298,7 +298,7 @@ kubectl get kamajicontrolplane -n {NAMESPACE}
 Expected output:
 ```
 NAME            VERSION   INITIALIZED   READY   AGE
-{CLUSTER_NAME}  v1.32.6   true          true    2m24s
+{CLUSTER_NAME}  v1.32.7   true          true    2m24s
 ```
 
 #### Check TenantControlPlane Status
@@ -310,7 +310,7 @@ kubectl get tenantcontrolplane -n {NAMESPACE}
 Expected output:
 ```
 NAME            VERSION   STATUS   CONTROL-PLANE ENDPOINT      KUBECONFIG                        DATASTORE           AGE
-{CLUSTER_NAME}  v1.32.6   Ready    192.168.142.243:6443        {CLUSTER_NAME}-admin-kubeconfig   {DATASTORE_NAME}    2m
+{CLUSTER_NAME}  v1.32.7   Ready    192.168.142.243:6443        {CLUSTER_NAME}-admin-kubeconfig   {DATASTORE_NAME}    2m
 ```
 
 #### Check Control Plane Pods
@@ -457,7 +457,7 @@ spec:
 - `{WORKER_NODE_REPLICAS}`: Number of worker node replicas (must not exceed available SSHHost resources)
 - `{CONFIG_TEMPLATE_NAME}`: Name of the KubeadmConfigTemplate created above
 - `{MACHINE_TEMPLATE_NAME}`: Name of the SSHMachineTemplate created above
-- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.6`, must match control plane version)
+- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.7`, must match control plane version)
 
 ### 3.5 Verify Worker Node Status
 

@@ -5,13 +5,13 @@ weight: 10
 
 # Deploy Etcd Cluster
 
-:::tip
-## Overview
 
+## Overview
+:::tip
 This guide demonstrates how to deploy a highly available etcd cluster using the etcd operator. Etcd is a distributed key-value store that provides reliable data storage for distributed systems, commonly used as the backing store for Kubernetes control plane data.
 :::
 
-:::warn
+:::info
 To deploy an etcd cluster, you need to install cluster plugin ** Alauda Build Of etcd Operator **, please refer to [Install](../install.mdx)
 :::
 
@@ -144,8 +144,11 @@ spec:
       certManagerCfg:
         issuerKind: Issuer
         issuerName: {CA_ISSUER_NAME}  # Reference to your CA issuer
-        validityDuration: 8760h  # Certificate validity (1 year)
+        validityDuration: 87600h 
   version: {ETCD_VERSION}  # e.g., v3.5.21
+  etcdOptions:
+  - --auto-compaction-mode=periodic
+  - --auto-compaction-retention=24h
 ```
 
 Replace the placeholders:

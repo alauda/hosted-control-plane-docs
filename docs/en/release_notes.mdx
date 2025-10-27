@@ -76,7 +76,7 @@ This is the initial release of Alauda Hosted Control Plane, introducing a new ap
 
 ### Technical Specifications
 
-- **Kubernetes Version**: v1.32.6 (compatible with global cluster versions)
+- **Kubernetes Version**: v1.32.7 (compatible with global cluster versions)
 - **Container Runtime**: Containerd 1.7.27-4
 - **Network Plugin**: Calico
 - **Storage Backend**: Etcd v3.5.21
@@ -94,7 +94,7 @@ This is the initial release of Alauda Hosted Control Plane, introducing a new ap
 
 ### Known Limitations
 
-- Only containerd is supported as the container runtime
-- Only etcd is supported as the storage backend driver
+- Containerd is the only supported container runtime
+- Etcd is the only supported storage backend driver
 - Pod and Service network CIDRs must not overlap with management cluster networks
 - SSH-based infrastructure provisioning only
