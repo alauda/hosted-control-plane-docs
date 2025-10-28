@@ -1,66 +1,513 @@
 ---
-weight: 40
+weight: 60
 ---
-
-:::tip
-
-Use a "simple and actionable" example to help users quickly experience the key features.
-
-For reference, you can view a [Quick Start example](https://product-doc-guide.alauda.cn/template/quick_start/example.html).
-
-:::
 
 # Quick Start
 
-Summarize the purpose, audience, and main content of this document in one sentence. For example: This document helps new users quickly understand and use the XXX feature.
+This document guides you through creating a new Kubernetes cluster using the Hosted Control Plane architecture.
 
-## Introduction
+## Prerequisites
 
-### Use Cases
+Before creating a hosted control plane cluster, ensure the following requirements are met:
 
-Provide users with a simple scenario to help them understand what this document covers and what problems it solves.
+### Management Cluster Ready
 
-### Estimated Reading Time
+Choose an Alauda Container Platform workload cluster as the management cluster. The management cluster must be ready before creating a new HCP cluster, as the hosted control plane components will run within it.
 
-Indicate the estimated time to read and follow this guide, for example: 10-15 minutes.
+If you choose a workload cluster as the management cluster, run the following command in the global CLI console:
 
-## Important Notes (Optional)
+```shell
+kubectl label clusters -n cpaas-system {MANAGEMENT_CLUSTER_NAME} cpaas.io/capi-cluster-manager=true
+```
 
-Highlight any important considerations users should be aware of before proceeding, such as: permission requirements, usage limitations, important reminders, or potential risks.
+### Environment Requirements
 
-## Prerequisites (Optional)
+The management cluster must have the following cluster plugins installed:
 
-List any preparations users need to make before following this guide, such as: required background knowledge, environment requirements, software versions, hardware configurations, or network requirements.
+- Alauda Container Platform Kubeadm Provider
+- Alauda Container Platform Hosted Control Plane
+- Alauda Container Platform SSH Infrastructure Provider
+
+### LoadBalancer Requirements
+
+The management cluster must support LoadBalancer service type, such as MetalLB (provided by Alauda Container Platform) or cloud-based load balancers.
+
+### Worker Host Ready
+
+Worker hosts must be prepared before creating a new cluster. Worker hosts can be physical or virtual machines.
+
+For detailed worker host requirements, refer to <ExternalSiteLink name="acp" href="/install/prepare/prerequisites" children="Worker Host Requirements" />.
+
+### Etcd Cluster Ready
+
+Each HCP cluster requires an etcd cluster as the storage backend for kube-apiserver. You need to deploy the etcd cluster before creating a new HCP cluster. If you haven't prepared an etcd cluster yet, refer to the document [Deploy Etcd Cluster](./how_to/deploy-etcd-cluster.mdx) for etcd cluster deployment instructions.
 
 ## Process Overview
 
-- Use a table to list the steps users need to follow, providing an overview of the entire process. The list should include:
-  - Step number: Starting from 1 and incrementing sequentially.
-  - Operation: The steps users need to perform. All steps should form a complete process, giving users a macro understanding of the feature and clearly showing what results they can expect.
-  - Description: A concise explanation of each step that allows users to quickly understand what's involved.
+Creating a hosted control plane cluster involves the following main steps:
 
-## Step-by-Step Instructions
+1. **Declare Backend Storage** - Create a DataStore resource to configure the etcd backend
+2. **Create Hosted Control Plane** - Deploy the control plane resources
+3. **Add Worker Nodes** - Deploy worker node resources
+4. **Access from Alauda Container Platform** - Integrate with ACP management console
 
-Provide detailed instructions for each step outlined in the Process Overview.
+The following sections provide detailed instructions for each step.
 
-### Step 1
+## Step 1: Declare Backend Storage
 
-- Begin with a paragraph summarizing this operation, helping users understand the basic concepts related to this functionality.
+Create a DataStore resource that declares the storage backend for kube-apiserver. A single DataStore resource can be shared across multiple HCP clusters.
 
-- Under the paragraph, use an ordered list to detail the specific configuration steps.
+```yaml
+---
+apiVersion: kamaji.clastix.io/v1alpha1
+kind: DataStore
+metadata:
+  name: {DATASTORE_NAME}
+spec:
+  driver: etcd
+  endpoints:
+    - {ETCD_ENDPOINT_0}
+    - {ETCD_ENDPOINT_1}
+    - {ETCD_ENDPOINT_2}
+  basicAuth: null
+  tlsConfig:
+    certificateAuthority:
+      certificate:
+        secretReference:
+          name: {ETCD_CA_SECRET_NAME}
+          namespace: {NAMESPACE}
+          keyPath: "tls.crt"
+      privateKey:
+        secretReference:
+          name: {ETCD_CA_SECRET_NAME}
+          namespace: {NAMESPACE}
+          keyPath: "tls.key"
+    clientCertificate:
+      certificate:
+        secretReference:
+          name: {ETCD_CLIENT_TLS_SECRET_NAME}
+          namespace: {NAMESPACE}
+          keyPath: "tls.crt"
+      privateKey:
+        secretReference:
+          name: {ETCD_CLIENT_TLS_SECRET_NAME}
+          namespace: {NAMESPACE}
+          keyPath: "tls.key"
+```
 
-...
+### DataStore Parameters
 
-### Step N
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `metadata.name` | string | Yes | Name of the DataStore resource. Use a descriptive name to identify this storage backend. |
+| `spec.driver` | string | Yes | Storage driver type. Currently only `etcd` is supported. |
+| `spec.endpoints` | []string | Yes | List of etcd cluster endpoints. Provide multiple endpoints for high availability. Format: `hostname:port` or `service-name.namespace.svc.cluster.local:port` |
+| `spec.basicAuth` | object | No | Basic authentication configuration for etcd. Set to `null` when using TLS certificate authentication. |
+| `spec.tlsConfig` | object | Yes | TLS configuration for secure communication with etcd cluster. |
+| `spec.tlsConfig.certificateAuthority` | object | Yes | CA certificate configuration used to verify the etcd server's certificate. |
+| `spec.tlsConfig.certificateAuthority.certificate.secretReference.name` | string | Yes | Name of the Secret containing the etcd CA certificate. |
+| `spec.tlsConfig.certificateAuthority.certificate.secretReference.namespace` | string | Yes | Namespace where the CA certificate Secret is stored. |
+| `spec.tlsConfig.certificateAuthority.certificate.secretReference.keyPath` | string | Yes | Key path within the Secret to the certificate file. Default: `tls.crt` |
+| `spec.tlsConfig.certificateAuthority.privateKey.secretReference.name` | string | Yes | Name of the Secret containing the etcd CA private key. |
+| `spec.tlsConfig.certificateAuthority.privateKey.secretReference.namespace` | string | Yes | Namespace where the CA private key Secret is stored. |
+| `spec.tlsConfig.certificateAuthority.privateKey.secretReference.keyPath` | string | Yes | Key path within the Secret to the private key file. Default: `tls.key` |
+| `spec.tlsConfig.clientCertificate.certificate.secretReference.name` | string | Yes | Name of the Secret containing the etcd client certificate. |
+| `spec.tlsConfig.clientCertificate.certificate.secretReference.namespace` | string | Yes | Namespace where the client certificate Secret is stored. |
+| `spec.tlsConfig.clientCertificate.certificate.secretReference.keyPath` | string | Yes | Key path within the Secret to the certificate file. Default: `tls.crt` |
+| `spec.tlsConfig.clientCertificate.privateKey.secretReference.name` | string | Yes | Name of the Secret containing the etcd client private key. |
+| `spec.tlsConfig.clientCertificate.privateKey.secretReference.namespace` | string | Yes | Namespace where the client private key Secret is stored. |
+| `spec.tlsConfig.clientCertificate.privateKey.secretReference.keyPath` | string | Yes | Key path within the Secret to the private key file. Default: `tls.key` |
 
-- Begin with a paragraph summarizing this operation, helping users understand the basic concepts related to this functionality.
+**Important Notes:**
 
-- Under the paragraph, use an ordered list to detail the specific configuration steps.
+- All certificate and key files must be stored in Kubernetes Secrets before creating the DataStore resource.
+- The etcd cluster must be accessible from the management cluster where the hosted control planes run.
+- Using TLS authentication is strongly recommended for production environments.
+- A single DataStore can serve multiple HCP clusters, enabling efficient resource sharing.
 
-### Expected Results (Adjust title based on actual content)
+## Step 2: Create Hosted Control Plane
 
-To help users better understand the entire process and functionality, use one or more of the following methods to demonstrate the expected results:
+The control plane deployment requires creating the following Kubernetes resources in sequence.
 
-- Feature Overview: Describe the main characteristics and purposes through text.
-- Visual Demonstration: Add images to visualize the results.
-- Step List: Detail the operation process through a step-by-step list.
+:::info
+**Best Practice:** For centralized management and operational consistency, it is recommended to deploy all hosted control plane resources within the `cpaas-system` namespace.
+:::
+
+### 2.1 Create Cluster Resource
+
+Create a Cluster API Cluster resource to declare the cluster and configure its network CIDRs.
+
+**Important:** The `podCIDR` and `serviceCIDR` must not overlap with the management cluster's network ranges.
+
+```yaml
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: {CLUSTER_NAME}
+  namespace: {NAMESPACE}
+  annotations:
+    capi.cpaas.io/resource-group-version: infrastructure.cluster.x-k8s.io/v1beta1
+    capi.cpaas.io/resource-kind: SSHCluster
+  labels:
+    cluster-type: HCP
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - {POD_CIDR}
+    services:
+      cidrBlocks:
+        - {SERVICE_CIDR}
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    kind: KamajiControlPlane
+    name: {CLUSTER_NAME}
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: SSHCluster
+    name: {CLUSTER_NAME}
+```
+
+**Parameter Description:**
+
+- `{CLUSTER_NAME}`: Name of your cluster (e.g., `my-hcp-cluster`)
+- `{NAMESPACE}`: Namespace for cluster resources (typically `cpaas-system`)
+- `{POD_CIDR}`: Pod network CIDR (e.g., `10.7.0.0/16`)
+- `{SERVICE_CIDR}`: Service network CIDR (e.g., `10.8.0.0/16`)
+
+### 2.2 Create Registry Credentials Secret (Optional)
+
+Create a Secret for container registry authentication. Skip this step if your registry doesn't require authentication.
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {REGISTRY_CREDENTIAL_NAME}
+  namespace: {NAMESPACE}
+data:
+  username: {BASE64_ENCODED_USERNAME}
+  password: {BASE64_ENCODED_PASSWORD}
+type: Opaque
+```
+
+**Parameter Description:**
+
+- `{REGISTRY_CREDENTIAL_NAME}`: Name of the registry credential Secret (e.g., `registry-credentials`)
+- `{BASE64_ENCODED_USERNAME}`: Base64-encoded registry username
+- `{BASE64_ENCODED_PASSWORD}`: Base64-encoded registry password
+
+### 2.3 Create SSHCluster Resource
+
+Configure the SSH-based infrastructure cluster.
+
+```yaml
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: SSHCluster
+metadata:
+  name: {CLUSTER_NAME}
+  namespace: {NAMESPACE}
+spec:
+  bootstrapImage:
+    registry: {REGISTRY_ADDRESS}
+    auth:  # Omit this section if registry authentication is not required
+      name: {REGISTRY_CREDENTIAL_NAME}
+  containerNetwork:
+    type: calico
+  controlPlaneLoadBalancers:
+    type: none
+```
+
+**Parameter Description:**
+
+- `{REGISTRY_ADDRESS}`: Container registry address (e.g., `harbor.example.com`)
+- `{REGISTRY_CREDENTIAL_NAME}`: Name of the registry credential Secret (omit `auth` section if no authentication is needed)
+
+### 2.4 Create KamajiControlPlane Resource
+
+Before creating the KamajiControlPlane resource, retrieve the CoreDNS and kube-proxy image tags from the management cluster:
+
+```shell
+# Get CoreDNS image tag
+kubectl get pods -n kube-system -l k8s-app=kube-dns -o jsonpath='{.items[0].spec.containers[0].image}'
+
+# Get kube-proxy image tag
+kubectl get pods -n kube-system -l k8s-app=kube-proxy -o jsonpath='{.items[0].spec.containers[0].image}'
+```
+
+Create the KamajiControlPlane resource:
+
+```yaml
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: KamajiControlPlane
+metadata:
+  name: {CLUSTER_NAME}
+  namespace: {NAMESPACE}
+spec:
+  dataStoreName: {DATASTORE_NAME}
+  addons:
+    coreDNS:
+      imageRepository: {REGISTRY_ADDRESS}/tkestack
+      imageTag: {COREDNS_IMAGE_TAG}
+    konnectivity:
+      server:
+        port: 8131
+      agent:
+        image: {REGISTRY_ADDRESS}/ait/apiserver-network-proxy-agent
+        tolerations:
+          - key: node-role.kubernetes.io/unschedulable
+            operator: Exists
+    kubeProxy:
+      imageRepository: {REGISTRY_ADDRESS}/tkestack
+      imageTag: {KUBE_PROXY_IMAGE_TAG}
+  kubelet:
+    cgroupfs: systemd
+    preferredAddressTypes:
+      - InternalIP
+      - Hostname
+  network:
+    serviceType: LoadBalancer
+  deployment:
+    replicas: {CONTROL_PLANE_REPLICAS}
+  version: {KUBERNETES_VERSION}
+```
+
+**Parameter Description:**
+
+- `{DATASTORE_NAME}`: Name of the DataStore resource created in Step 1
+- `{REGISTRY_ADDRESS}`: Container registry address
+- `{COREDNS_IMAGE_TAG}`: CoreDNS image tag (obtained from the command above)
+- `{KUBE_PROXY_IMAGE_TAG}`: kube-proxy image tag (typically matches Kubernetes version)
+- `{CONTROL_PLANE_REPLICAS}`: Number of control plane replicas (recommended: `3` for high availability)
+- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.7`, check global cluster for supported versions)
+
+### 2.5 Verify Control Plane Status
+
+After deploying the control plane resources, verify that all components are running correctly:
+
+#### Check KamajiControlPlane Status
+
+```shell
+kubectl get kamajicontrolplane -n {NAMESPACE}
+```
+
+Expected output:
+```
+NAME            VERSION   INITIALIZED   READY   AGE
+{CLUSTER_NAME}  v1.32.7   true          true    2m24s
+```
+
+#### Check TenantControlPlane Status
+
+```shell
+kubectl get tenantcontrolplane -n {NAMESPACE}
+```
+
+Expected output:
+```
+NAME            VERSION   STATUS   CONTROL-PLANE ENDPOINT      KUBECONFIG                        DATASTORE           AGE
+{CLUSTER_NAME}  v1.32.7   Ready    192.168.142.243:6443        {CLUSTER_NAME}-admin-kubeconfig   {DATASTORE_NAME}    2m
+```
+
+#### Check Control Plane Pods
+
+```shell
+kubectl get pods -n {NAMESPACE} | grep {CLUSTER_NAME}
+```
+
+Expected output (all pods should be in `Running` state):
+```
+{CLUSTER_NAME}-7c94d64d6c-gcn6q   4/4   Running   0   3m37s
+{CLUSTER_NAME}-7c94d64d6c-kktn4   4/4   Running   0   3m37s
+{CLUSTER_NAME}-7c94d64d6c-thhfk   4/4   Running   0   3m37s
+```
+
+If all three checks show healthy status, the control plane deployment was successful.
+
+## Step 3: Add Worker Nodes
+
+After the control plane is running, add worker nodes to the cluster.
+
+### 3.1 Create SSHHost and Credentials
+
+Create SSH credentials and host definitions for each worker node:
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {HOST_CREDENTIAL_NAME}
+  namespace: {NAMESPACE}
+data:
+  username: {BASE64_ENCODED_SSH_USERNAME}
+  password: {BASE64_ENCODED_SSH_PASSWORD}
+type: Opaque
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: SSHHost
+metadata:
+  name: {HOST_NAME}
+  namespace: {NAMESPACE}
+spec:
+  authCredential:
+    name: {HOST_CREDENTIAL_NAME}
+  ip: {HOST_IP_ADDRESS}
+  port: {SSH_PORT}
+  reUse: {REUSE_HOST}
+```
+
+**Parameter Description:**
+
+- `{HOST_CREDENTIAL_NAME}`: Name of the SSH credential Secret (e.g., `worker-node-credentials`)
+- `{BASE64_ENCODED_SSH_USERNAME}`: Base64-encoded SSH username
+- `{BASE64_ENCODED_SSH_PASSWORD}`: Base64-encoded SSH password
+- `{HOST_NAME}`: Name for this worker host (e.g., `worker-node-1`)
+- `{HOST_IP_ADDRESS}`: IP address of the worker host (e.g., `192.168.143.64`)
+- `{SSH_PORT}`: SSH port (default: `22`)
+- `{REUSE_HOST}`: Whether to reuse the host after Machine deletion (`true` or `false`). If `true`, the host will be cleaned and reused when the corresponding Machine resource is deleted.
+
+### 3.2 Create SSHMachineTemplate
+
+Define the machine template specifying the container runtime configuration.
+
+**Note:** Currently only containerd is supported. The plugin includes containerd version 1.7.27-4 by default. If using a different version, ensure the corresponding image exists in your registry.
+
+```yaml
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: SSHMachineTemplate
+metadata:
+  name: {MACHINE_TEMPLATE_NAME}
+  namespace: {NAMESPACE}
+spec:
+  template:
+    spec:
+      containerRuntime:
+        type: containerd
+        version: {CONTAINERD_VERSION}
+```
+
+**Parameter Description:**
+
+- `{MACHINE_TEMPLATE_NAME}`: Name of the machine template (e.g., `worker-template`)
+- `{CONTAINERD_VERSION}`: Container runtime version (e.g., `1.7.27-4`)
+
+### 3.3 Create KubeadmConfigTemplate
+
+Configure kubelet settings. If you don't have special requirements, use the default configuration.
+
+```yaml
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: {CONFIG_TEMPLATE_NAME}
+  namespace: {NAMESPACE}
+spec:
+  template:
+    spec:
+      joinConfiguration:
+        nodeRegistration: {}
+```
+
+**Parameter Description:**
+
+- `{CONFIG_TEMPLATE_NAME}`: Name of the config template (e.g., `worker-config-template`)
+
+### 3.4 Create MachineDeployment
+
+Deploy worker nodes using a MachineDeployment:
+
+```yaml
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: {MACHINE_DEPLOYMENT_NAME}
+  namespace: {NAMESPACE}
+spec:
+  clusterName: {CLUSTER_NAME}
+  replicas: {WORKER_NODE_REPLICAS}
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: {CONFIG_TEMPLATE_NAME}
+      clusterName: {CLUSTER_NAME}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: SSHMachineTemplate
+        name: {MACHINE_TEMPLATE_NAME}
+      version: {KUBERNETES_VERSION}
+```
+
+**Parameter Description:**
+
+- `{MACHINE_DEPLOYMENT_NAME}`: Name of the machine deployment (e.g., `worker-deployment`)
+- `{CLUSTER_NAME}`: Name of your cluster (must match the Cluster resource name)
+- `{WORKER_NODE_REPLICAS}`: Number of worker node replicas (must not exceed available SSHHost resources)
+- `{CONFIG_TEMPLATE_NAME}`: Name of the KubeadmConfigTemplate created above
+- `{MACHINE_TEMPLATE_NAME}`: Name of the SSHMachineTemplate created above
+- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.7`, must match control plane version)
+
+### 3.5 Verify Worker Node Status
+
+After deployment, check the MachineDeployment status:
+
+```shell
+kubectl get machinedeployment -n {NAMESPACE}
+```
+
+Expected output:
+```
+NAME                        CLUSTER         REPLICAS   READY   UPDATED   UNAVAILABLE   PHASE     AGE
+{MACHINE_DEPLOYMENT_NAME}   {CLUSTER_NAME}  1          1       1         0             Running   5m
+```
+
+If the status shows as healthy, worker nodes have been successfully added to the cluster.
+
+## Step 4: Access from Alauda Container Platform
+
+After the cluster is fully deployed, integrate it with Alauda Container Platform.
+
+### Retrieve Cluster Kubeconfig
+
+Run the following command on the management cluster to retrieve the cluster's kubeconfig:
+
+```shell
+kubectl get secret -n {NAMESPACE} {CLUSTER_NAME}-admin-kubeconfig -o jsonpath='{.data.value}' | base64 -d
+```
+
+### Import to ACP
+
+Use the retrieved kubeconfig to import the cluster into Alauda Container Platform through the ACP console interface.
+
+## Troubleshooting
+
+If you encounter issues during deployment, check the following:
+
+1. **Control Plane Issues:**
+   - Verify DataStore connectivity to etcd cluster
+   - Check control plane pod logs: `kubectl logs -n {NAMESPACE} {POD_NAME}`
+   - Ensure LoadBalancer service has received an external IP
+
+2. **Worker Node Issues:**
+   - Verify SSH connectivity to worker hosts
+   - Check SSHHost status: `kubectl get sshhost -n {NAMESPACE}`
+   - Review Machine provisioning logs: `kubectl describe machine -n {NAMESPACE}`
+
+3. **Network Issues:**
+   - Ensure Pod CIDR and Service CIDR don't conflict with management cluster
+   - Verify network plugin (Calico) is running correctly
+   - Check konnectivity agent connectivity
+
+For additional support, consult the Alauda Container Platform documentation or contact support.

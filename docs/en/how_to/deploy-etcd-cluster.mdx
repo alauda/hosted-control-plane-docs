@@ -1,0 +1,330 @@
+---
+title: Deploy Etcd Cluster
+weight: 10
+---
+
+# Deploy Etcd Cluster
+
+
+## Overview
+:::tip
+This guide demonstrates how to deploy a highly available etcd cluster using the etcd operator. Etcd is a distributed key-value store that provides reliable data storage for distributed systems, commonly used as the backing store for Kubernetes control plane data.
+:::
+
+:::info
+To deploy an etcd cluster, you need to install cluster plugin ** Alauda Build Of etcd Operator **, please refer to [Install](../install.mdx)
+:::
+
+## Prerequisites
+
+Before deploying an etcd cluster, ensure the following requirements are met:
+
+- A running Kubernetes cluster with the etcd operator installed
+- Cert-manager installed and configured in your cluster
+- Sufficient resources available for the etcd cluster (CPU, memory, and storage)
+- A storage class configured for persistent volumes (e.g., `sc-topolvm`)
+- `kubectl` CLI tool configured to access your cluster
+
+## Certificate Management
+
+Etcd requires TLS certificates for secure communication between cluster members. You can either generate new certificates using cert-manager or use existing certificates.
+
+**Parameters used in this section:**
+- `{ROOT_CA_NAME}`: The name of the root CA certificate and secret (e.g., `etcd-root-ca`)
+- `{CA_ISSUER_NAME}`: The name of the cert-manager Issuer (e.g., `etcd-ca-issuer`)
+
+### Option 1: Generate CA with Cert-Manager
+
+If you don't have an existing CA, you can create one using cert-manager.
+
+#### Step 1: Generate CA Secret
+
+Create a Certificate resource that will generate the root CA:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {ROOT_CA_NAME}
+  namespace: cpaas-system
+spec:
+  isCA: true
+  commonName: {ROOT_CA_NAME}
+  secretName: {ROOT_CA_NAME}
+  duration: 87600h # 10 years
+  renewBefore: 720h # Renew 30 days before expiry
+  issuerRef:
+    name: cpaas-ca
+    kind: Issuer
+```
+
+Apply this configuration:
+```shell
+kubectl apply -f root-ca-certificate.yaml
+```
+
+#### Step 2: Create Root CA Issuer
+
+Once the CA secret is created, create an Issuer that references it:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {CA_ISSUER_NAME}
+  namespace: cpaas-system
+spec:
+  ca:
+    secretName: {ROOT_CA_NAME}
+```
+
+Apply the issuer configuration:
+```shell
+kubectl apply -f ca-issuer.yaml
+```
+
+Verify the issuer is ready:
+```shell
+kubectl get issuer {CA_ISSUER_NAME} -n cpaas-system
+```
+
+### Option 2: Use Existing CA
+
+If you already have a CA certificate stored as a Kubernetes secret, you can create an issuer directly:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {CA_ISSUER_NAME}
+  namespace: cpaas-system
+spec:
+  ca:
+    secretName: {ROOT_CA_NAME}
+```
+
+Apply the configuration:
+```shell
+kubectl apply -f ca-issuer.yaml
+```
+
+## Deployment Procedure
+
+### Step 1: Determine Etcd Version
+
+First, determine the appropriate etcd version to use. You can check the version used by your global cluster:
+
+```shell
+kubectl get pods -n kube-system -l component=etcd \
+  -o jsonpath='{.items[0].spec.containers[0].image}' | awk -F: '{print $NF}'
+```
+
+This command will output the etcd version, for example: `v3.5.21`
+
+### Step 2: Create EtcdCluster Resource
+
+Create an `EtcdCluster` custom resource with your desired configuration:
+
+```yaml
+apiVersion: operator.etcd.io/v1alpha1
+kind: EtcdCluster
+metadata:
+  name: {ETCD_CLUSTER_NAME}
+  namespace: cpaas-system
+spec:
+  size: 3  # Number of etcd members (recommended: 3, 5, or 7)
+  storageSpec:
+    accessModes: ReadWriteOnce
+    storageClassName: {SC_NAME}  # Use your storage class
+    volumeSizeLimit: 20Gi  # Maximum volume size
+    volumeSizeRequest: 10Gi  # Initial volume size
+  tls:
+    provider: cert-manager
+    providerCfg:
+      certManagerCfg:
+        issuerKind: Issuer
+        issuerName: {CA_ISSUER_NAME}  # Reference to your CA issuer
+        validityDuration: 87600h 
+  version: {ETCD_VERSION}  # e.g., v3.5.21
+  etcdOptions:
+  - --auto-compaction-mode=periodic
+  - --auto-compaction-retention=24h
+```
+
+Replace the placeholders:
+- `{ETCD_CLUSTER_NAME}`: The name of your etcd cluster
+- `{SC_NAME}`: The name of your storage class
+- `{CA_ISSUER_NAME}`: The name of your cert-manager Issuer
+- `{ETCD_VERSION}`: The etcd version (e.g., `v3.5.21`)
+
+Apply the configuration:
+```shell
+kubectl apply -f etcd-cluster.yaml
+```
+
+### Step 3: Monitor Deployment Status
+
+Monitor the StatefulSet creation and rollout:
+
+```shell
+# Check StatefulSet status
+kubectl get statefulset -n cpaas-system {ETCD_CLUSTER_NAME}
+
+# Watch pod creation
+kubectl get pods -n cpaas-system -l controller={ETCD_CLUSTER_NAME} -w 
+```
+
+Wait until all pods are in the `Running` state and ready (this may take a few minutes).
+
+## Verification
+
+After deployment, verify that the etcd cluster is healthy and operational:
+
+**Set the following variables:**
+- `{ETCD_CLUSTER_NAME}`: The name of your etcd cluster (same as specified in the EtcdCluster resource)
+- `{NAMESPACE}`: The namespace where etcd is deployed (e.g., `cpaas-system`)
+
+### Check Cluster Health
+
+Access one of the etcd pods and check the cluster health:
+
+```shell
+
+ETCD_CLUSTER_NAME={ETCD_CLUSTER_NAME}
+NAMESPACE={NAMESPACE}
+ETCD_POD=$(kubectl get pods -n cpaas-system -l controller=$ETCD_CLUSTER_NAME -o jsonpath='{.items[0].metadata.name}')
+
+# Check cluster health
+kubectl exec -n cpaas-system $ETCD_POD -- etcdctl \
+  --endpoints=$ETCD_POD.$ETCD_CLUSTER_NAME.$NAMESPACE.svc.cluster.local:2379 \
+  --cacert=/etc/etcd/certs/server/ca.crt \
+  --cert=/etc/etcd/certs/server/tls.crt \
+  --key=/etc/etcd/certs/server/tls.key \
+  endpoint health
+```
+
+### Check Cluster Members
+
+List all cluster members:
+
+```shell
+kubectl exec -n cpaas-system $ETCD_POD -- etcdctl \
+  --endpoints=$ETCD_POD.$ETCD_CLUSTER_NAME.$NAMESPACE.svc.cluster.local:2379 \
+  --cacert=/etc/etcd/certs/server/ca.crt \
+  --cert=/etc/etcd/certs/server/tls.crt \
+  --key=/etc/etcd/certs/server/tls.key \
+  member list
+```
+
+### Test Data Operations
+
+Perform a simple write and read test:
+
+```shell
+# Write a test key
+kubectl exec -n cpaas-system $ETCD_POD -- etcdctl \
+  --endpoints=$ETCD_POD.$ETCD_CLUSTER_NAME.$NAMESPACE.svc.cluster.local:2379 \
+  --cacert=/etc/etcd/certs/server/ca.crt \
+  --cert=/etc/etcd/certs/server/tls.crt \
+  --key=/etc/etcd/certs/server/tls.key \
+  put test-key Hello
+
+# Read the test key
+kubectl exec -n cpaas-system $ETCD_POD -- etcdctl \
+  --endpoints=$ETCD_POD.$ETCD_CLUSTER_NAME.$NAMESPACE.svc.cluster.local:2379 \
+  --cacert=/etc/etcd/certs/server/ca.crt \
+  --cert=/etc/etcd/certs/server/tls.crt \
+  --key=/etc/etcd/certs/server/tls.key \
+  get test-key
+```
+
+## Configuration Options
+
+### Cluster Size
+
+The `size` field determines the number of etcd members. For production use:
+- **3 members**: Standard configuration, tolerates 1 failure
+- **5 members**: High availability, tolerates 2 failures
+- **7 members**: Maximum recommended, tolerates 3 failures
+
+:::warning
+Always use an odd number of members to maintain quorum during failures.
+:::
+
+### Storage Configuration
+
+- **storageClassName**: Specify your storage class that supports dynamic provisioning
+- **volumeSizeRequest**: Initial size of the persistent volume
+- **volumeSizeLimit**: Maximum size the volume can grow to (if supported by storage class)
+
+### TLS Configuration
+
+- **validityDuration**: Certificate validity period (recommended: 8760h or 1 year)
+- Certificates are automatically renewed by cert-manager before expiration
+
+## Troubleshooting
+
+**Parameters used in this section:**
+- `{ETCD_CLUSTER_NAME}`: The name of your etcd cluster
+- `{POD_NAME}`: The name of a specific pod (get from `kubectl get pods`)
+- `{OTHER_POD_IP}`: The IP address of another pod (get from `kubectl get pods -o wide`)
+- `{ROOT_CA_NAME}`: The name of the root CA certificate
+- `{CA_ISSUER_NAME}`: The name of the cert-manager Issuer
+
+### Pods Not Starting
+
+If pods fail to start, check the following:
+
+```shell
+# Check pod events
+kubectl describe pods -n cpaas-system -l controller={ETCD_CLUSTER_NAME}
+
+# Check pod logs
+kubectl logs -n cpaas-system {POD_NAME}
+
+# Check PVC status
+kubectl get pvc -n cpaas-system
+
+# Check logs
+kubectl logs -n cpaas-system -l service_name=etcd-operator-controller-manager
+```
+
+Common issues:
+- Insufficient storage capacity
+- Storage class not found
+- Certificate issuer not ready
+- Resource constraints (CPU/memory)
+
+### Cluster Not Forming Quorum
+
+If the cluster fails to form quorum:
+
+```shell
+# Check all pod logs
+kubectl logs -n cpaas-system -l controller={ETCD_CLUSTER_NAME} --all-containers=true
+
+
+```
+
+### Certificate Issues
+
+Verify certificates are properly issued:
+
+```shell
+# Check certificate resources
+kubectl get certificates -n cpaas-system
+
+# Check certificate details
+kubectl describe certificate {ROOT_CA_NAME} -n cpaas-system
+
+# Check issuer status
+kubectl get issuer {CA_ISSUER_NAME} -n cpaas-system -o yaml
+```
+
+## Best Practices
+
+1. **Backup Strategy**: Implement regular etcd backups for disaster recovery
+2. **Monitoring**: Set up monitoring and alerting for cluster health
+3. **Resource Limits**: Configure appropriate resource requests and limits
+4. **Network Policies**: Implement network policies to secure etcd communication
+5. **Regular Maintenance**: Keep etcd version updated and monitor storage usage

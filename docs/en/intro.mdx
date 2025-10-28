@@ -2,22 +2,43 @@
 weight: 10
 ---
 
-:::tip
-
-The "Introduction" section serves as the opening of product documentation or a functional module, providing an overall description of the product or function. It offers readers a clear initial understanding.
-
-You can view an [Introduction Document example](https://product-doc-guide.alauda.cn/template/intro/example.html) for reference.
-
-:::
-
 # Introduction
 
-> Apart from the introduction itself, if other sections are too long or relatively complex, they can be separated into independent documents.
+<Term name="product" /> Hosted Control Plane is an innovative Kubernetes cluster management solution that fundamentally changes how control planes are deployed and managed. Unlike traditional standalone models where each cluster requires dedicated nodes for control plane components, the hosted control plane architecture decouples the control plane from the data plane, treating control plane components as regular Kubernetes workloads.
 
-This section provides a brief description. Specifically introduce the intended use of [Product/Module Name]. For example:
+## What is Hosted Control Plane?
 
-Container Management is a containerized management module built on Kubernetes for cloud-native applications. It is the core of ACP, based on a native multi-cluster architecture, decoupling the underlying infrastructure to achieve unified management of multi-cloud and multi-cluster environments, significantly simplifying the enterprise's cloud application process and effectively reducing operational management and labor costs. Through container management, you can easily create Kubernetes clusters and quickly build an enterprise-level container cloud management platform.
+In a traditional Kubernetes deployment, each cluster consists of:
+- A **control plane** that manages cluster resources, applications, and services (API server, controller manager, scheduler, and etcd)
+- A **data plane** that handles actual workloads (worker nodes)
 
-## Limitations[Optional]
+Both components typically reside in the same environment with dedicated nodes for the control plane.
 
-> If there are usage limitations for the [Product/Module], they can be explained here.
+The hosted control plane architecture changes this paradigm by:
+- Running control plane components as standard Kubernetes workloads (deployments and stateful sets)
+- Hosting multiple control planes on a shared management cluster
+- Enabling the data plane to operate in a separate network domain or physical environment
+- Treating control planes like any other application workload
+
+## Why Choose Hosted Control Plane?
+
+The hosted control plane model addresses several key challenges in enterprise Kubernetes deployments:
+
+**Resource Optimization**: By sharing infrastructure across multiple control planes, organizations can significantly reduce hardware requirements and operational costs while maintaining optimal performance.
+
+**Operational Excellence**: Centralized management of all control planes simplifies day-to-day operations, upgrades, and maintenance. Standard Kubernetes tools and practices can be applied consistently across all control planes.
+
+**Enhanced Scalability**: New clusters can be provisioned rapidly without allocating dedicated infrastructure. Control plane components scale independently based on actual demand rather than pre-allocated capacity.
+
+**Improved Security and Isolation**: The separation of control plane and data plane enables better network segmentation and reduces the attack surface. Data plane nodes don't need to host control plane components, enhancing security posture.
+
+**Greater Flexibility**: The architecture supports diverse deployment scenarios where data planes may be in different network domains, physical locations, or even on-premises environments while control planes remain centrally managed.
+
+## Use Cases
+
+Hosted Control Plane is ideal for:
+- **Multi-tenant environments** requiring strong isolation between tenants
+- **Edge computing** scenarios where data planes are distributed across multiple locations
+- **Hybrid cloud deployments** with data planes in different infrastructure domains
+- **Service providers** managing numerous customer clusters
+- **Enterprises** seeking to optimize infrastructure utilization and reduce operational overhead

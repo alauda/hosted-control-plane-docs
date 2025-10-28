@@ -1,44 +1,100 @@
 ---
-weight: 10
+weight: 20
 ---
-
-:::tip
-
-You can view a [Release Notes example](https://product-doc-guide.alauda.cn/template/release_notes/example.html) for reference.
-
-:::
 
 # Release Notes
 
-## Minor Version: e.g., 2.0.0
+## Initial Release
 
-### Features and Enhancements
+### Overview
 
-#### Feature Name
-Provide a brief introduction to the new or enhanced features.
+This is the initial release of <Term name="product" /> Hosted Control Plane, introducing a new approach to Kubernetes cluster management where control plane components run as standard workloads on a management cluster, decoupled from the data plane.
 
+### Core Features
 
-### Deprecated
+#### Hosted Control Plane Architecture
 
-#### Feature Name
-Provide a brief introduction to the deprecated features, including reasons for deprecation and suggested alternatives.
+- **Control Plane as Workload**: Control plane components (API server, controller manager, scheduler) run as Kubernetes deployments and stateful sets on a management cluster
+- **Decoupled Architecture**: Complete separation between control plane and data plane, enabling independent scaling and management
+- **Multi-Tenancy Support**: Multiple control planes can be hosted on a single management cluster with proper isolation
+- **Kamaji Integration**: Built on Kamaji for robust control plane lifecycle management
 
+#### Storage Backend
 
-### Features to be phased out
+- **Etcd Integration**: Support for external etcd clusters as the storage backend for control plane data
+- **Shared DataStore**: Single etcd cluster can serve multiple hosted control planes for resource efficiency
+- **TLS Security**: Full TLS certificate support for secure communication with etcd clusters
+- **Flexible Configuration**: Support for multiple etcd endpoints with high availability
 
-#### Feature Name
-Provide a brief introduction to the features that will be deprecated, including reasons for deprecation and suggested alternatives.
+#### Infrastructure Management
 
+- **SSH Infrastructure Provider**: Automated worker node provisioning via SSH
+- **Machine Lifecycle Management**: Declarative machine deployment and management using Cluster API
+- **Host Reusability**: Support for host reuse after machine deletion for resource optimization
+- **Flexible Worker Configuration**: Customizable machine templates and bootstrap configurations
 
-### Fixed Issues
+#### Networking
 
-The list of bug fixes can be automatically generated from JIRA issues using the `release-notes-for-bugs` component provided by the documentation framework.
+- **Calico Network Plugin**: Integrated Calico support for pod networking
+- **LoadBalancer Support**: Control plane API server exposed via LoadBalancer service (MetalLB or cloud provider)
+- **Konnectivity Integration**: Secure connectivity between control plane and worker nodes
+- **Configurable Network CIDRs**: Customizable pod and service network ranges per cluster
 
-For usage instructions, refer to the [Guide to Automatically Generating Release Notes](https://product-doc-guide.alauda.cn/guide/auto_gen_releasenotes.html).
+#### Container Runtime
 
+- **Containerd Support**: Full support for containerd runtime (version 1.7.27-4)
+- **Registry Integration**: Support for private container registries with authentication
+- **Image Management**: Automated pull and management of required component images
 
-### Known Issues
+#### Kubernetes Support
 
-Similar to bug fixes, known issues can be automatically generated from JIRA issues using the `release-notes-for-bugs` component provided by the documentation framework.
+- **Version Compatibility**: Support for Kubernetes v1.32.7 and other versions supported by the global cluster
+- **Standard Kubernetes APIs**: Full compatibility with standard Kubernetes APIs and tools
+- **Cluster API**: Built on Cluster API (CAPI) for standardized cluster management
+- **Kubeadm Bootstrap**: Using kubeadm for worker node configuration
 
-For usage instructions, refer to the [Guide to Automatically Generating Release Notes](https://product-doc-guide.alauda.cn/guide/auto_gen_releasenotes.html).
+#### Management and Operations
+
+- **Centralized Management**: All hosted control planes managed from a single management cluster
+- **Declarative Configuration**: All resources defined using Kubernetes custom resources
+- **Status Monitoring**: Built-in status reporting for control planes and worker nodes
+- **Alauda Container Platform Integration**: Native integration with ACP management console
+
+#### High Availability
+
+- **Control Plane Replicas**: Support for multiple control plane replicas for high availability
+- **Etcd Cluster Support**: Integration with highly available etcd clusters (3, 5, or 7 members)
+- **Failure Domain Isolation**: Control plane and data plane failures don't directly impact each other
+- **LoadBalancer Resilience**: Automatic failover through LoadBalancer service
+
+### Supported Components
+
+- **Alauda Container Platform Provider Kubeadm**: Kubeadm bootstrap provider
+- **Alauda Container Platform Hosted Control Plane**: Core hosted control plane controller
+- **Alauda Container Platform SSH Infrastructure Provider**: SSH-based infrastructure provisioning
+- **Alauda Build Of etcd Operator**: Etcd cluster operator for backend storage
+
+### Technical Specifications
+
+- **Kubernetes Version**: v1.32.7 (compatible with global cluster versions)
+- **Container Runtime**: Containerd 1.7.27-4
+- **Network Plugin**: Calico
+- **Storage Backend**: Etcd v3.5.21
+- **Infrastructure Provider**: SSH
+- **Control Plane Manager**: Kamaji
+- **Load Balancer**: MetalLB or cloud provider LoadBalancer
+
+### Requirements
+
+- Management cluster running Alauda Container Platform
+- LoadBalancer service type support in management cluster
+- Worker hosts accessible via SSH
+- External etcd cluster with TLS certificates
+- Cert-manager for certificate management
+
+### Known Limitations
+
+- Containerd is the only supported container runtime
+- Etcd is the only supported storage backend driver
+- Pod and Service network CIDRs must not overlap with management cluster networks
+- SSH-based infrastructure provisioning only
