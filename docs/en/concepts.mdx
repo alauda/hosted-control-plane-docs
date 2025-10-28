@@ -1,12 +1,43 @@
 ---
-weight: 10
+weight: 30
 ---
 
-# Core Concepts
+# Concepts
 
-This document introduces the core concepts of Hosted Control Plane that you need to understand when deploying and managing clusters.
+This section explains the core concepts and architectural principles of Alauda Hosted Control Plane. Understanding these concepts is essential for effectively deploying and managing hosted control plane clusters.
 
-## Management Cluster
+## What You'll Learn
+
+- **Core Concepts**: Fundamental building blocks including Management Cluster, Hosted Control Plane, Data Plane, DataStore, and key Kubernetes resources
+- **Architecture Deep Dive**: In-depth exploration of the architecture, design principles, communication flows, and configuration best practices
+
+## Overview
+
+Alauda Hosted Control Plane introduces a new paradigm for Kubernetes cluster management by decoupling control plane components from data plane nodes. Instead of dedicating physical nodes to host control plane components, they run as standard Kubernetes workloads on a shared management cluster.
+
+This architectural approach provides significant benefits:
+
+- **Resource Efficiency**: Multiple control planes share infrastructure, reducing hardware requirements by 60-80%
+- **Operational Simplicity**: Centralized management of all control planes using standard Kubernetes tools
+- **Rapid Provisioning**: Deploy new clusters in minutes without allocating dedicated infrastructure
+- **Enhanced Isolation**: Control plane and data plane operate independently with better failure domain separation
+- **Greater Flexibility**: Support for edge computing, hybrid cloud, and multi-tenant scenarios
+
+## Key Concepts at a Glance
+
+| Concept | Description |
+|---------|-------------|
+| **Management Cluster** | A Kubernetes cluster running on Alauda Container Platform that hosts multiple control plane instances |
+| **Hosted Control Plane** | Kubernetes control plane components (API server, controller manager, scheduler) running as workloads |
+| **Data Plane** | Worker nodes in separate infrastructure that run application workloads |
+| **DataStore** | Configuration for external etcd cluster used as storage backend for control plane data |
+| **TenantControlPlane** | Kamaji resource representing a complete control plane instance for one cluster |
+| **Konnectivity** | Network proxy maintaining secure connections between control plane and worker nodes |
+| **Cluster API** | Kubernetes standard for declarative cluster lifecycle management |
+
+## Core Concepts
+
+### Management Cluster
 
 The **Management Cluster** is a Kubernetes cluster that hosts the control plane components of one or more workload clusters. It runs all the control plane workloads (API servers, controller managers, schedulers) as standard Kubernetes deployments and stateful sets.
 
@@ -23,7 +54,7 @@ The **Management Cluster** is a Kubernetes cluster that hosts the control plane 
 - Reducing infrastructure overhead by sharing resources
 - Implementing multi-tenant cluster architectures
 
-## Hosted Control Plane
+### Hosted Control Plane
 
 A **Hosted Control Plane** is a Kubernetes control plane that runs as workloads within a management cluster, rather than on dedicated nodes. Each hosted control plane consists of:
 
@@ -41,7 +72,7 @@ The control plane is completely decoupled from the data plane, allowing independ
 - Simplified control plane upgrades
 - Better failure domain isolation
 
-## Data Plane
+### Data Plane
 
 The **Data Plane** consists of worker nodes that run actual workloads (applications, services, pods). In the hosted control plane architecture, the data plane is completely separated from the control plane.
 
@@ -52,7 +83,7 @@ The **Data Plane** consists of worker nodes that run actual workloads (applicati
 - Can be scaled independently of control plane
 - Uses standard Kubernetes components (kubelet, kube-proxy, CNI)
 
-## DataStore
+### DataStore
 
 A **DataStore** is a Kubernetes custom resource that defines the storage backend for control plane data. It configures the connection to an external etcd cluster that stores all Kubernetes API objects for one or more hosted control planes.
 
@@ -86,7 +117,7 @@ spec:
 - Supports only etcd driver in current release
 - Requires TLS configuration for production use
 
-## TenantControlPlane
+### TenantControlPlane
 
 A **TenantControlPlane** (managed by Kamaji) represents a complete Kubernetes control plane for a single cluster. It is automatically created when you create a `KamajiControlPlane` resource and manages:
 
@@ -103,15 +134,15 @@ A **TenantControlPlane** (managed by Kamaji) represents a complete Kubernetes co
 - Kubeconfig secret reference
 - Associated DataStore
 
-## Cluster API Resources
+### Cluster API Resources
 
 Hosted Control Plane is built on **Cluster API (CAPI)**, a Kubernetes project for declarative cluster management. Key CAPI resources include:
 
-### Cluster
+#### Cluster
 
 Defines a Kubernetes cluster, including network configuration (pod CIDR, service CIDR) and references to control plane and infrastructure resources.
 
-### KamajiControlPlane
+#### KamajiControlPlane
 
 Defines the hosted control plane configuration, including:
 - Kubernetes version
@@ -120,14 +151,14 @@ Defines the hosted control plane configuration, including:
 - Addon configurations (CoreDNS, kube-proxy, Konnectivity)
 - Network service type (LoadBalancer)
 
-### SSHCluster
+#### SSHCluster
 
 Infrastructure cluster definition for SSH-based provisioning, including:
 - Container registry configuration
 - Network plugin selection (Calico)
 - LoadBalancer configuration
 
-### MachineDeployment
+#### MachineDeployment
 
 Manages a set of worker nodes declaratively, similar to a Deployment for pods. Includes:
 - Number of replicas
@@ -135,14 +166,14 @@ Manages a set of worker nodes declaratively, similar to a Deployment for pods. I
 - Bootstrap configuration reference
 - Version specification
 
-### SSHHost
+#### SSHHost
 
 Represents a physical or virtual machine accessible via SSH. Defines:
 - IP address and SSH port
 - Authentication credentials
 - Reuse policy (whether to clean and reuse after deletion)
 
-## Konnectivity
+### Konnectivity
 
 **Konnectivity** is a network connectivity solution that maintains secure connections between the control plane (in the management cluster) and worker nodes (in the data plane). It consists of:
 
@@ -156,7 +187,7 @@ Represents a physical or virtual machine accessible via SSH. Defines:
 - Works across network boundaries and firewalls
 - Uses a secure tunnel with TLS authentication
 
-## Container Runtime
+### Container Runtime
 
 The **Container Runtime** is responsible for running containers on worker nodes. Hosted Control Plane currently supports:
 
@@ -168,11 +199,11 @@ The **Container Runtime** is responsible for running containers on worker nodes.
 - Automatically installed on worker nodes during provisioning
 - Supports private registry authentication
 
-## Network Configuration
+### Network Configuration
 
 Network configuration defines the IP address ranges used by cluster components:
 
-### Pod CIDR
+#### Pod CIDR
 
 The IP address range allocated for pod networking. Each pod receives an IP address from this range.
 
@@ -181,7 +212,7 @@ The IP address range allocated for pod networking. Each pod receives an IP addre
 - Must not overlap with service CIDR
 - Typical format: `10.x.0.0/16`
 
-### Service CIDR
+#### Service CIDR
 
 The IP address range allocated for Kubernetes services. Each service receives a cluster IP from this range.
 
@@ -190,10 +221,9 @@ The IP address range allocated for Kubernetes services. Each service receives a 
 - Must not overlap with pod CIDR
 - Typical format: `10.x.0.0/16`
 
-### Network Plugin
+#### Network Plugin
 
 Currently supports **Calico**, which provides:
 - Pod-to-pod networking
 - Network policy enforcement
 - IP address management (IPAM)
-
