@@ -1,0 +1,7 @@
+kamajicontrolplanes
+kamajicontrolplanetemplates
+etcdclusters
+tenantcontrolplanes
+datastores
+kamaji
+clastix
