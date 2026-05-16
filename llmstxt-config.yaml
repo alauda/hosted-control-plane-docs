@@ -1,0 +1,24 @@
+project_name: "Alauda Hosted Control Plane"
+summary: "Documentation for Alauda Hosted Control Plane — a Kubernetes solution that hosts multiple Kubernetes control planes as workloads on a shared management cluster, decoupling them from the data plane."
+
+include_patterns:
+  - "**/*.md"
+  - "**/*.mdx"
+
+exclude_patterns:
+  - "**/node_modules/**"
+  - "**/.git/**"
+  - "**/llms.txt"
+  - "**/CHANGELOG.md"
+  - "**/CONTRIBUTING.md"
+  - "**/README.md"
+  - ".llmstxt-cache/**"
+  - "**/.llmstxt-cache/**"
+  - "llmstxt-state.json"
+  - "**/llmstxt-state.json"
+
+grouping_base_path: "docs/en"
+
+batch_size: 15
+
+description_max_words: 150
