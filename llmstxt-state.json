@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "generator_version": 3,
+  "project_name": "Alauda Hosted Control Plane",
+  "summary": "Documentation for Alauda Hosted Control Plane — a Kubernetes solution that hosts multiple Kubernetes control planes as workloads on a shared management cluster, decoupling them from the data plane.",
+  "generated_at": "2026-05-16T04:51:42Z",
+  "include_patterns": [
+    "**/*.md",
+    "**/*.mdx"
+  ],
+  "exclude_patterns": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/llms.txt",
+    "**/CHANGELOG.md",
+    "**/CONTRIBUTING.md",
+    "**/README.md",
+    ".llmstxt-cache/**",
+    "**/.llmstxt-cache/**",
+    "llmstxt-state.json",
+    "**/llmstxt-state.json",
+    "llms.txt"
+  ],
+  "grouping_base_path": "docs/en",
+  "description_max_words": 150,
+  "files": {
+    "docs/en/apis/index.mdx": {
+      "sha256": "4bcd357fc96a51b3b593ac85ee840ea9f73c2ff4db23fd71b29ddf9a0b9a6f9b",
+      "size": 70,
+      "description": "Top-level API reference landing page that renders an `<Overview/>` component to surface child sections covering Kubernetes APIs introduced by Hosted Control Plane and related Cluster API CRDs.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/intro.mdx": {
+      "sha256": "ba573e272a43d002cda4be47046ab94646c34a62222106375a4e866a83493722",
+      "size": 55,
+      "description": "Introduction to the API reference that renders the `<AcpApisOverview/>` MDX component to display the auto-generated catalog of Alauda Container Platform APIs surfaced by the Hosted Control Plane plugins.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/controlplane.cluster.x-k8s.io/index.mdx": {
+      "sha256": "5d7afc2311b88d6c38bc2ead5f8e93514b42a703bb8aa4ebce08b14dc63559de",
+      "size": 73,
+      "description": "Index page for the `controlplane.cluster.x-k8s.io` API group provided by Kamaji, grouping the CRD references for `KamajiControlPlane` and `KamajiControlPlaneTemplate` that drive hosted control plane lifecycles.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/controlplane.cluster.x-k8s.io/kamajicontrolplane.mdx": {
+      "sha256": "a1cfdea9d2a50b10d7206e0a4a732b5ec27b4fa098f310d7ced6d4729c132eff",
+      "size": 152,
+      "description": "Auto-generated CRD reference for `KamajiControlPlane` (controlplane.cluster.x-k8s.io/v1alpha1), the Cluster API control plane resource that declares Kubernetes version, replicas, DataStore reference, CoreDNS/kube-proxy/Konnectivity addons, kubelet settings, and LoadBalancer network service for a hosted control plane; rendered via the `<K8sCrd/>` component against `kamajicontrolplanes.controlplane.cluster.x-k8s.io`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/controlplane.cluster.x-k8s.io/kamajicontrolplanetemplate.mdx": {
+      "sha256": "63f505125e37f0767bbf7c26b52efa77094179fcc5e71571abb8a0bf9e2a3c17",
+      "size": 168,
+      "description": "Auto-generated CRD reference for `KamajiControlPlaneTemplate` (controlplane.cluster.x-k8s.io/v1alpha1), used by Cluster API ClusterClass topologies to template `KamajiControlPlane` specs; renders the schema via the `<K8sCrd/>` MDX component bound to `kamajicontrolplanetemplates.controlplane.cluster.x-k8s.io`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/index.mdx": {
+      "sha256": "f3cb72e118a2be58877705195ecdfb5494693868eceb886b05d4d71db58479a0",
+      "size": 72,
+      "description": "Section index that aggregates Kubernetes API group references introduced by Hosted Control Plane, including `controlplane.cluster.x-k8s.io` (Kamaji) and `infrastructure.cluster.x-k8s.io` (SSH), rendered via the `<Overview/>` component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/infrastructure.cluster.x-k8s.io/index.mdx": {
+      "sha256": "d1a6a53eac297be9f55c5de1624aed4ddacb8e6d9756c2dcb6634329d421c23d",
+      "size": 74,
+      "description": "Landing page for the `infrastructure.cluster.x-k8s.io` API group provided by the SSH Infrastructure Provider, grouping CRD references such as `SSHCluster` (and related host/machine template resources) that back Cluster API infrastructureRef bindings.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/infrastructure.cluster.x-k8s.io/sshcluster.mdx": {
+      "sha256": "6013e29f1ff813638168645f1f982d9a6e58eb987034e1930c5da82d8fbb7dce",
+      "size": 139,
+      "description": "Auto-generated CRD reference for `SSHCluster` (infrastructure.cluster.x-k8s.io/v1beta1), the SSH Infrastructure Provider's cluster-scoped infrastructure object that declares the bootstrap image registry plus optional auth Secret, the container network plugin (Calico), and control-plane load balancer settings; rendered via `<K8sCrd/>` against `sshclusters.infrastructure.cluster.x-k8s.io`.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/infrastructure.cluster.x-k8s.io/sshhost.mdx": {
+      "sha256": "e21b6fec212744609ced1131e663cb0797f448cf7cee44f59024b2383f040ef9",
+      "size": 133,
+      "description": "Auto-generated CRD reference page for the `SSHHost` resource (`sshhosts.infrastructure.cluster.x-k8s.io/v1beta1`) used by the Cluster API SSH infrastructure provider. SSHHost represents a physical or virtual bare-metal machine reachable over SSH that can be claimed by an SSHMachine to provision a hosted-control-plane workload node; the page renders the full OpenAPI schema (spec/status fields, connection credentials, allocation state) via the `K8sCrd` MDX component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/infrastructure.cluster.x-k8s.io/sshmachine.mdx": {
+      "sha256": "bcaacf6a2b2a9ed04f46e779a879b183b11477ef343000155297ed956e9dcc0c",
+      "size": 139,
+      "description": "Auto-generated CRD reference for the `SSHMachine` resource (`sshmachines.infrastructure.cluster.x-k8s.io/v1beta1`), the Cluster API infrastructure-machine type for the SSH provider. An SSHMachine binds to an available SSHHost and represents a single node of a hosted-control-plane workload cluster provisioned over SSH; the page renders the OpenAPI schema (host selector, provider ID, ready/failure state) via the `K8sCrd` MDX component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/infrastructure.cluster.x-k8s.io/sshmachinetemplate.mdx": {
+      "sha256": "f87d8a4f034793832246c8ea967c5ebbbdb578b0d5963f319c3c6a991816b43b",
+      "size": 155,
+      "description": "Auto-generated CRD reference for the `SSHMachineTemplate` resource (`sshmachinetemplates.infrastructure.cluster.x-k8s.io/v1beta1`). SSHMachineTemplate is the Cluster API machine template consumed by KubeadmControlPlane / MachineDeployment to mass-produce SSHMachine objects (and hence SSH-attached workload nodes) for a hosted control plane; the page renders the full CRD schema via the `K8sCrd` MDX component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/kamaji.clastix.io/datastore.mdx": {
+      "sha256": "62d42d69fc56473ad2641c0b2aaf9e6cf66d879733aa8958a7abd2cfb12f62fa",
+      "size": 110,
+      "description": "Auto-generated CRD reference for Kamaji's `DataStore` resource (`datastores.kamaji.clastix.io/v1alpha1`). A DataStore declares a shared storage backend (etcd, MySQL, PostgreSQL, NATS) that Kamaji TenantControlPlanes use to persist their Kubernetes state, including endpoints, TLS material and credentials; the page renders the full schema via the `K8sCrd` MDX component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/kamaji.clastix.io/index.mdx": {
+      "sha256": "1ef0520fb8f2662e2efa869ad574f43efabac9df68f604bca29da25d6c423eae",
+      "size": 61,
+      "description": "Navigation/index landing page for the `kamaji.clastix.io` API group reference. Uses the `Overview` MDX component to auto-list the API group's CRD pages — `DataStore` and `TenantControlPlane` — which together define how Kamaji runs Kubernetes tenant control planes as pods on a management cluster.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/kamaji.clastix.io/tenantcontrolplane.mdx": {
+      "sha256": "2a24b87127d4c9895b9f3a7af8ee1bc1bec6408484fd7a0442bbbf5885ae404b",
+      "size": 128,
+      "description": "Auto-generated CRD reference for Kamaji's `TenantControlPlane` resource (`tenantcontrolplanes.kamaji.clastix.io/v1alpha1`), the core object that runs a hosted Kubernetes control plane (kube-apiserver, controller-manager, scheduler) as pods on the management cluster. The schema (rendered via `K8sCrd`) covers control-plane replicas, kubernetes version, networking/exposure (LoadBalancer/NodePort/Ingress), addons, and the referenced DataStore.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/operator.etcd.io/etcdcluster.mdx": {
+      "sha256": "6de58a00677498f603e4d6af09430dd6931e5dea1ae232f821100a6ba4a0a841",
+      "size": 112,
+      "description": "Auto-generated CRD reference for the `EtcdCluster` resource (`etcdclusters.operator.etcd.io/v1alpha1`) managed by the Alauda Build of etcd-operator. EtcdCluster declaratively provisions an HA etcd StatefulSet — size, etcd version, persistent storage (storageClassName / volume size request and limit), cert-manager-issued TLS, and extra `etcdOptions` such as auto-compaction; the page renders the full schema via the `K8sCrd` component.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/apis/kubernetes_apis/operator.etcd.io/index.mdx": {
+      "sha256": "a89b2decfaf2d15fe0b8188901954d76e75b1b1e8d89107f9700f1fbd9ea370a",
+      "size": 60,
+      "description": "Navigation/index landing page for the `operator.etcd.io` API group reference. Uses the `Overview` MDX component to auto-list the group's single CRD — `EtcdCluster` — exposed by the etcd-operator that backs Kamaji TenantControlPlanes and other hosted-control-plane data stores.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/architecture.mdx": {
+      "sha256": "a66d99182b2d376116811ed82c7d06cd233cd3183796f266c2b28e633623bf2f",
+      "size": 3539,
+      "description": "Contrasts the standalone Kubernetes deployment model (dedicated control plane nodes running kube-apiserver, controller manager, scheduler, etcd) with Alauda Hosted Control Plane's decoupled architecture, where control plane components run as Kubernetes Deployments and StatefulSets on a management cluster while the data plane lives in a separate network domain. Enumerates the resulting benefits across resource efficiency, operational simplicity, scalability and multi-tenancy, cost, reliability through failure-domain isolation, and security through network segmentation.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/concepts.mdx": {
+      "sha256": "1df44dde83cdf84de0c029daf5a7437ed46296d4fcd859d907db560d2e4cc4c2",
+      "size": 8757,
+      "description": "Explains the core building blocks of Alauda Hosted Control Plane: the Management Cluster (an ACP workload cluster requiring MetalLB-style LoadBalancer support plus the Kubeadm Provider, Hosted Control Plane, and SSH Infrastructure Provider plugins), the Hosted Control Plane (API server, controller manager, scheduler, Konnectivity server), the Data Plane, the DataStore CRD pointing at external etcd over TLS, the Kamaji TenantControlPlane, and Cluster API resources (Cluster, KamajiControlPlane, SSHCluster, MachineDeployment, SSHHost). Also covers Konnectivity server/agent tunnelling, containerd 1.7.27-4 runtime, and pod/service CIDR plus Calico network plugin requirements.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/how_to/deploy-etcd-cluster.mdx": {
+      "sha256": "351b27bbe3cdd1b0c8082c61f0d5a71b2ba608fb08e94b15069f3b2cbeaae228",
+      "size": 9244,
+      "description": "Step-by-step guide to deploying a highly available etcd cluster on Alauda Container Platform using the Alauda Build of etcd-operator. Walks through prerequisites (cert-manager, storage class), creating a root CA Certificate and Issuer in the `cpaas-system` namespace, detecting the global cluster's etcd image version, applying an `EtcdCluster` (size 3/5/7, `storageSpec`, cert-manager TLS, periodic auto-compaction `etcdOptions`), and verifying health with `etcdctl endpoint health`, `member list` and put/get smoke tests; includes troubleshooting for PVC, quorum and certificate issues.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/how_to/index.mdx": {
+      "sha256": "d6c890445818d4b494a347d3aff171bc08d4aad67c4bc8756c365f583f8d2f12",
+      "size": 42,
+      "description": "Navigation landing page for the How-To section of the hosted-control-plane docs (weight 70). Uses the `Overview` MDX component to auto-list task-oriented guides under `docs/en/how_to/`, such as deploying an etcd cluster as the backing data store for Kamaji tenant control planes.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/index.mdx": {
+      "sha256": "ea8d719fb06b69c8f8fa90c79d3ec2a67457c854f2c664fb78f523febe3f6960",
+      "size": 48,
+      "description": "Top-level navigation stub for the English documentation set; renders an `<Overview/>` component that auto-generates links to the introduction, concepts, architecture, install, quick start, release notes, how-to guides, and API reference sections.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/install.mdx": {
+      "sha256": "c11035a12eba4e5dbd5fbdcc0d507da874a47c08df0e3c789d588034f6038210",
+      "size": 839,
+      "description": "Installation prerequisites for the Hosted Control Plane stack: download the three cluster plugins (Alauda Container Platform Provider Kubeadm, Hosted Control Plane, SSH Infrastructure Provider) plus the Alauda Build Of etcd Operator app from the Customer Portal, then upload the packages and install them as cluster plugins via the ACP `extend/upload_package` and `extend/cluster_plugin` workflows.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/intro.mdx": {
+      "sha256": "89f6078f29c5ed24de6b1413f8c54465ea9646315bdfad1f0482fdc9a0974b12",
+      "size": 2988,
+      "description": "Introduces Alauda Hosted Control Plane and contrasts it with traditional Kubernetes deployments by running control plane components (API server, controller manager, scheduler, etcd) as workloads on a shared management cluster instead of dedicated nodes. Highlights the drivers (resource optimization, centralized operations, rapid scaling, network/security isolation, deployment flexibility) and the canonical use cases: multi-tenant platforms, edge fleets, hybrid cloud, service-provider managed clusters, and enterprise consolidation.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/quick_start.mdx": {
+      "sha256": "7bd3f6c4d4e24a375f30b1ddd6d274c575a5a0f3b90d997d4e6c529ac33cde34",
+      "size": 18088,
+      "description": "End-to-end walkthrough for creating an HCP cluster: label an ACP workload cluster with `cpaas.io/capi-cluster-manager=true`, ensure LoadBalancer support and an external etcd, then apply a `DataStore` (kamaji.clastix.io/v1alpha1) referencing TLS Secrets, a CAPI `Cluster` with non-overlapping pod/service CIDRs pointing at `KamajiControlPlane` and `SSHCluster`, registry credentials, the `KamajiControlPlane` with CoreDNS/kube-proxy/Konnectivity addons and a Kubernetes version, then `SSHHost`/`SSHMachineTemplate`/`KubeadmConfigTemplate`/`MachineDeployment` for workers. Includes verification commands for KamajiControlPlane, TenantControlPlane and Machine status, kubeconfig retrieval via the `{cluster}-admin-kubeconfig` Secret for ACP import, and troubleshooting tips for DataStore, SSH, and CIDR conflicts.",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    },
+    "docs/en/release_notes.mdx": {
+      "sha256": "359f4b090d5dccf00b5e3d0524d21a24d4e4c52982a2b8b829a74829856beb88",
+      "size": 5101,
+      "description": "Release notes covering the 2026-01-15 update (HCP v1.0.2, SSH Infrastructure Provider v1.0.3, etcd Operator v1.0.2, Kubeadm Provider v1.0.6, adding Kubernetes 1.33 support and vulnerability fixes) and the initial release. The initial release documents Kamaji-based hosted control planes, shared etcd v3.5.21 DataStore with TLS, SSH-based machine provisioning, Calico networking, MetalLB LoadBalancer integration, Konnectivity tunneling, containerd 1.7.27-4 runtime, Kubernetes v1.32.7 support, and known limitations (containerd-only, etcd-only, no CIDR overlap, SSH-only).",
+      "generation_method": "ai_agent_reading",
+      "updated_at": "2026-05-16T04:51:42Z"
+    }
+  }
+}
