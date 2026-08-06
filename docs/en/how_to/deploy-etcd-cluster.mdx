@@ -242,7 +242,7 @@ kubectl exec -n cpaas-system $ETCD_POD -- etcdctl \
 
 ### Cluster Size
 
-The `size` field determines the number of etcd members. For production use:
+The `size` field determines the number of etcd members. Common odd-member configurations are:
 - **3 members**: Standard configuration, tolerates 1 failure
 - **5 members**: High availability, tolerates 2 failures
 - **7 members**: Maximum recommended, tolerates 3 failures
