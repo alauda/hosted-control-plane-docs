@@ -4,6 +4,10 @@ weight: 60
 
 # Quick Start
 
+:::warning
+Hosted Control Plane is currently Technology Preview and is intended only for non-production proof-of-concept (POC) evaluation. The HCP POC supports only traditional operating systems; Alauda OS is not supported.
+:::
+
 This document guides you through creating a new Kubernetes cluster using the Hosted Control Plane architecture.
 
 ## Prerequisites
@@ -122,7 +126,7 @@ spec:
 
 - All certificate and key files must be stored in Kubernetes Secrets before creating the DataStore resource.
 - The etcd cluster must be accessible from the management cluster where the hosted control planes run.
-- Using TLS authentication is strongly recommended for production environments.
+- Use TLS authentication to secure communication with the etcd cluster.
 - A single DataStore can serve multiple HCP clusters, enabling efficient resource sharing.
 
 ## Step 2: Create Hosted Control Plane
