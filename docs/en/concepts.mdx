@@ -46,7 +46,7 @@ The **Management Cluster** is a Kubernetes cluster that hosts the control plane 
 - Workload cluster hosted in Alauda Container Platform
 - Must support LoadBalancer service type (e.g., MetalLB)
 - Hosts multiple control planes with proper isolation
-- Requires cluster plugins: Kubeadm Provider, Hosted Control Plane, SSH Infrastructure Provider
+- Requires cluster plugins: **Cluster Bootstrap Provider** (previously **Kubeadm Provider**), **Hosted Control Plane Cluster Provider** (previously **Hosted Control Plane**), **Hosted Control Plane Worker Node Provider** (previously **SSH Infrastructure Provider**)
 
 **Use cases:**
 
