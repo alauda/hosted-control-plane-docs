@@ -28,9 +28,9 @@ kubectl label clusters -n cpaas-system {MANAGEMENT_CLUSTER_NAME} cpaas.io/capi-c
 
 The management cluster must have the following cluster plugins installed:
 
-- Alauda Container Platform Kubeadm Provider
-- Alauda Container Platform Hosted Control Plane
-- Alauda Container Platform SSH Infrastructure Provider
+- **Alauda Container Platform Cluster Bootstrap Provider** (previously **Alauda Container Platform Kubeadm Provider**)
+- **Alauda Container Platform Hosted Control Plane Cluster Provider** (previously **Alauda Container Platform Hosted Control Plane**)
+- **Alauda Container Platform Hosted Control Plane Worker Node Provider** (previously **Alauda Container Platform SSH Infrastructure Provider**)
 
 ### LoadBalancer Requirements
 
