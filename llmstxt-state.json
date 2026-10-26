@@ -172,11 +172,11 @@
       "updated_at": "2026-05-16T04:51:42Z"
     },
     "docs/en/install.mdx": {
-      "sha256": "c11035a12eba4e5dbd5fbdcc0d507da874a47c08df0e3c789d588034f6038210",
-      "size": 839,
-      "description": "Installation prerequisites for the Hosted Control Plane stack: download the three cluster plugins (Alauda Container Platform Provider Kubeadm, Hosted Control Plane, SSH Infrastructure Provider) plus the Alauda Build Of etcd Operator app from the Customer Portal, then upload the packages and install them as cluster plugins via the ACP `extend/upload_package` and `extend/cluster_plugin` workflows.",
+      "sha256": "9ec41d8bea42b54ba3c3b849d7110223eab068742314a4c856733ca9eebacb80",
+      "size": 1411,
+      "description": "Installation prerequisites for the Hosted Control Plane stack: download the three cluster plugins (Alauda Container Platform Cluster Bootstrap Provider, Hosted Control Plane Cluster Provider, Hosted Control Plane Worker Node Provider; previously Kubeadm Provider, Hosted Control Plane, SSH Infrastructure Provider) plus the Alauda Container Platform Control Plane Database Operator app (previously Alauda Build Of etcd Operator) from the Customer Portal, then upload the packages and install them as cluster plugins via the ACP `extend/upload_package` and `extend/cluster_plugin` workflows.",
       "generation_method": "ai_agent_reading",
-      "updated_at": "2026-05-16T04:51:42Z"
+      "updated_at": "2026-10-26T07:03:20Z"
     },
     "docs/en/intro.mdx": {
       "sha256": "89f6078f29c5ed24de6b1413f8c54465ea9646315bdfad1f0482fdc9a0974b12",
