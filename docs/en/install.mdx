@@ -10,13 +10,15 @@ Use the following steps to install the component.
 
 :::info
 To use the hosted control plane, you need two cluster plugins from Customer Portal.
-1. **Alauda Container Platform Provider Kubeadm**
-2. **Alauda Container Platform Hosted Control Plane**
-3. **Alauda Container Platform SSH Infrastructure Provider**
+1. **Alauda Container Platform Cluster Bootstrap Provider** (previously **Alauda Container Platform Kubeadm Provider**)
+2. **Alauda Container Platform Hosted Control Plane Cluster Provider** (previously **Alauda Container Platform Hosted Control Plane**)
+3. **Alauda Container Platform Hosted Control Plane Worker Node Provider** (previously **Alauda Container Platform SSH Infrastructure Provider**)
+
+Starting in ACP 4.5, these plugins and the etcd operator app below have new names. Search for the new names when you download them from the Customer Portal. A package published before the rename still shows the former name in the platform after you upload it.
 :::
 
 :::info
-To deploy etcd operator, you need to download the app named **Alauda Build Of etcd Operator** from Customer Portal.
+To deploy etcd operator, you need to download the app named **Alauda Container Platform Control Plane Database Operator** (previously **Alauda Build Of etcd Operator**) from Customer Portal.
 :::
 
 ## Uploading
