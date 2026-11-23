@@ -1,3 +1,6 @@
 - name: acp
+  displayName:
+    en: Alauda Container Platform
+    zh: Alauda Container Platform
   base: /container_platform
   version: "4.5"
