@@ -112,7 +112,7 @@ kubectl apply -f ca-issuer.yaml
 
 ### Step 1: Determine Etcd Version
 
-First, determine the appropriate etcd version to use. You can check the version used by your global cluster:
+First, determine the appropriate etcd version to use. You can check the version used by your `global` cluster:
 
 ```shell
 kubectl get pods -n kube-system -l component=etcd \

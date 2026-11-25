@@ -18,7 +18,7 @@ Before creating a hosted control plane cluster, ensure the following requirement
 
 Choose an Alauda Container Platform workload cluster as the management cluster. The management cluster must be ready before creating a new HCP cluster, as the hosted control plane components will run within it.
 
-If you choose a workload cluster as the management cluster, run the following command in the global CLI console:
+If you choose a workload cluster as the management cluster, run the following command in the `global` cluster CLI console:
 
 ```shell
 kubectl label clusters -n cpaas-system {MANAGEMENT_CLUSTER_NAME} cpaas.io/capi-cluster-manager=true
@@ -26,7 +26,7 @@ kubectl label clusters -n cpaas-system {MANAGEMENT_CLUSTER_NAME} cpaas.io/capi-c
 
 ### Environment Requirements
 
-The management cluster must have the following cluster plugins installed:
+The management cluster must have the following Cluster Plugins installed:
 
 - **Alauda Container Platform Cluster Bootstrap Provider** (previously **Alauda Container Platform Kubeadm Provider**)
 - **Alauda Container Platform Hosted Control Plane Cluster Provider** (previously **Alauda Container Platform Hosted Control Plane**)
@@ -287,7 +287,7 @@ spec:
 - `{COREDNS_IMAGE_TAG}`: CoreDNS image tag (obtained from the command above)
 - `{KUBE_PROXY_IMAGE_TAG}`: kube-proxy image tag (typically matches Kubernetes version)
 - `{CONTROL_PLANE_REPLICAS}`: Number of control plane replicas (recommended: `3` for high availability)
-- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.7`, check global cluster for supported versions)
+- `{KUBERNETES_VERSION}`: Kubernetes version (e.g., `v1.32.7`, check the `global` cluster for supported versions)
 
 ### 2.5 Verify Control Plane Status
 
@@ -379,7 +379,7 @@ spec:
 
 Define the machine template specifying the container runtime configuration.
 
-**Note:** Currently only containerd is supported. The plugin includes containerd version 1.7.27-4 by default. If using a different version, ensure the corresponding image exists in your registry.
+**Note:** Currently only containerd is supported. The Cluster Plugin includes containerd version 1.7.27-4 by default. If using a different version, ensure the corresponding image exists in your registry.
 
 ```yaml
 ---
